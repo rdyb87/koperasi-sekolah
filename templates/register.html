@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Daftar - Koperasi Sekolah{% endblock %}
+
+{% block content %}
+<div class="min-h-screen gradient-bg flex items-center justify-center px-4 py-8">
+    <div class="max-w-md w-full">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 fade-in">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-4">📝</div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Daftar Akaun</h1>
+                <p class="text-gray-600">Buat akaun pelajar baharu</p>
+            </div>
+            
+            <!-- Error Message -->
+            {% if error %}
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="font-medium">{{ error }}</span>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Registration Form -->
+            <form method="POST" action="{{ url_for('register') }}" class="space-y-5">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Nama Penuh <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="name"
+                        name="name" 
+                        required 
+                        autofocus
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        placeholder="Cth: Ahmad bin Abdullah">
+                </div>
+                
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                        Username <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="username"
+                        name="username" 
+                        required 
+                        pattern="[a-zA-Z0-9_]+"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        placeholder="Cth: ahmad123">
+                    <p class="text-xs text-gray-500 mt-1">Gunakan huruf, nombor dan underscore sahaja</p>
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                        Password <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="password" 
+                        id="password"
+                        name="password" 
+                        required 
+                        minlength="6"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        placeholder="Minimum 6 aksara">
+                    <p class="text-xs text-gray-500 mt-1">Sekurang-kurangnya 6 aksara</p>
+                </div>
+                
+                <div class="pt-2">
+                    <button 
+                        type="submit" 
+                        class="w-full gradient-bg text-white py-3 rounded-lg font-semibold text-lg hover:opacity-90 transition transform hover:scale-105">
+                        Daftar Akaun
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Login Link -->
+            <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+                <p class="text-sm text-gray-600">
+                    Sudah ada akaun? 
+                    <a href="{{ url_for('login') }}" 
+                       class="text-purple-600 hover:text-purple-800 font-semibold transition">
+                        Log masuk di sini
+                    </a>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-6 text-white text-sm">
+            <p>© 2024 Koperasi Sekolah. Sistem Pembelian Peralatan.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation feedback
+document.querySelector('form').addEventListener('submit', function(e) {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        e.preventDefault();
+        alert('Username hanya boleh mengandungi huruf, nombor dan underscore');
+        return false;
+    }
+    
+    if (password.length < 6) {
+        e.preventDefault();
+        alert('Password mesti sekurang-kurangnya 6 aksara');
+        return false;
+    }
+});
+</script>
+{% endblock %}

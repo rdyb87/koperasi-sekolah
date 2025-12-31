@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Pengurusan Pesanan - Koperasi Sekolah{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-50">
+    <!-- Sidebar -->
+    <div class="hidden md:flex md:flex-col md:w-64 gradient-bg text-white flex-shrink-0">
+        <div class="flex items-center h-16 px-4 border-b border-white/20">
+            <span class="text-2xl mr-3">🏫</span>
+            <span class="font-bold text-xl">Admin Panel</span>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="{{ url_for('admin_dashboard') }}" 
+               class="flex items-center px-4 py-3 rounded-lg hover:bg-white/10 transition">
+                <span class="text-xl mr-3">📊</span>
+                Dashboard
+            </a>
+            <a href="{{ url_for('admin_products') }}" 
+               class="flex items-center px-4 py-3 rounded-lg hover:bg-white/10 transition">
+                <span class="text-xl mr-3">📦</span>
+                Produk
+            </a>
+            <a href="{{ url_for('admin_orders') }}" 
+               class="flex items-center px-4 py-3 rounded-lg bg-white/20 font-semibold hover:bg-white/30 transition">
+                <span class="text-xl mr-3">🛒</span>
+                Pesanan
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/20">
+            <a href="{{ url_for('logout') }}" 
+               class="flex items-center px-4 py-3 rounded-lg bg-red-500 hover:bg-red-600 font-semibold transition">
+                <span class="text-xl mr-3">🚪</span>
+                Keluar
+            </a>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Pengurusan Pesanan</h1>
+                <p class="text-gray-600">Semak dan urus pesanan pelajar</p>
+            </div>
+            
+            <!-- Filter Tabs -->
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button onclick="filterOrders('all')" 
+                        class="filter-tab px-4 py-2 rounded-lg bg-purple-600 text-white font-medium">
+                    Semua
+                </button>
+                <button onclick="filterOrders('pending')" 
+                        class="filter-tab px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium hover:bg-gray-300">
+                    Menunggu
+                </button>
+                <button onclick="filterOrders('processing')" 
+                        class="filter-tab px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium hover:bg-gray-300">
+                    Diproses
+                </button>
+                <button onclick="filterOrders('completed')" 
+                        class="filter-tab px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium hover:bg-gray-300">
+                    Selesai
+                </button>
+            </div>
+            
+            <!-- Orders List -->
+            {% if orders %}
+            <div class="space-y-6">
+                {% for order_data in orders %}
+                {% set order = order_data['order'] %}
+                {% set order_items = order_data['items'] %}
+                <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover order-card" data-status="{{ order.status }}">
+                    <!-- Order Header -->
+                    <div class="bg-gradient-to-r from-purple-50 to-purple-100 p-6 border-b">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h3 class="text-xl font-bold text-gray-800">Pesanan #{{ order.id }}</h3>
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                        {% if order.status == 'completed' %}bg-green-100 text-green-800
+                                        {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                                        {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                        {% if order.status == 'pending' %}⏳ Menunggu
+                                        {% elif order.status == 'processing' %}🔄 Diproses
+                                        {% elif order.status == 'completed' %}✅ Selesai
+                                        {% elif order.status == 'cancelled' %}❌ Dibatalkan
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="space-y-1 text-sm text-gray-600">
+                                    <p><strong>Pelajar:</strong> {{ order.student_name }}</p>
+                                    <p><strong>Tarikh:</strong> {{ order.created_at }}</p>
+                                    {% if order.notes %}
+                                    <p><strong>Catatan:</strong> {{ order.notes }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="text-left lg:text-right">
+                                <p class="text-sm text-gray-600 mb-1">Jumlah Bayaran</p>
+                                <p class="text-2xl font-bold text-purple-600">RM {{ "%.2f"|format(order.total_amount) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Items -->
+                    <div class="p-6">
+                        <h4 class="font-semibold text-gray-800 mb-4">Item Pesanan:</h4>
+                        <div class="space-y-2">
+                            {% for item in order_items %}
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                                <span class="text-gray-700">{{ item.product_name }} <span class="text-gray-500 text-sm">({{ item.quantity }} unit)</span></span>
+                                <span class="font-semibold text-gray-800">RM {{ "%.2f"|format(item.price * item.quantity) }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Payment Proof -->
+                        {% if order.payment_proof %}
+                        <div class="mt-6 pt-6 border-t">
+                            <h4 class="font-semibold text-gray-800 mb-3">Bukti Pembayaran:</h4>
+                            <a href="{{ url_for('static', filename='uploads/' + order.payment_proof) }}" 
+                               target="_blank"
+                               class="inline-block">
+                                <img src="{{ url_for('static', filename='uploads/' + order.payment_proof) }}" 
+                                     alt="Bukti Pembayaran" 
+                                     class="max-w-xs rounded-lg border-2 border-gray-200 hover:border-purple-500 transition cursor-pointer">
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Update Status -->
+                        <div class="mt-6 pt-6 border-t">
+                            <form method="POST" action="{{ url_for('update_order_status', order_id=order.id) }}" class="flex flex-col sm:flex-row gap-3">
+                                <select name="status" 
+                                        class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Menunggu Pengesahan</option>
+                                    <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>Sedang Diproses</option>
+                                    <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Selesai</option>
+                                    <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Dibatalkan</option>
+                                </select>
+                                <button type="submit" 
+                                        class="gradient-bg text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                                    Kemaskini Status
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="bg-white rounded-xl shadow-md p-12 text-center">
+                <div class="text-6xl mb-4">📭</div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Tiada Pesanan</h3>
+                <p class="text-gray-600">Tiada pesanan diterima lagi</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function filterOrders(status) {
+    const cards = document.querySelectorAll('.order-card');
+    const tabs = document.querySelectorAll('.filter-tab');
+    
+    // Update tab styling
+    tabs.forEach(tab => {
+        tab.classList.remove('bg-purple-600', 'text-white');
+        tab.classList.add('bg-gray-200', 'text-gray-700');
+    });
+    event.target.classList.remove('bg-gray-200', 'text-gray-700');
+    event.target.classList.add('bg-purple-600', 'text-white');
+    
+    // Filter cards
+    cards.forEach(card => {
+        if (status === 'all' || card.dataset.status === status) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

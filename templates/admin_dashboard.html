@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Koperasi Sekolah{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-50">
+    <!-- Sidebar -->
+    <div class="hidden md:flex md:flex-col md:w-64 gradient-bg text-white flex-shrink-0">
+        <div class="flex items-center h-16 px-4 border-b border-white/20">
+            <span class="text-2xl mr-3">🏫</span>
+            <span class="font-bold text-xl">Admin Panel</span>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="{{ url_for('admin_dashboard') }}" 
+               class="flex items-center px-4 py-3 rounded-lg bg-white/20 font-semibold hover:bg-white/30 transition">
+                <span class="text-xl mr-3">📊</span>
+                Dashboard
+            </a>
+            <a href="{{ url_for('admin_products') }}" 
+               class="flex items-center px-4 py-3 rounded-lg hover:bg-white/10 transition">
+                <span class="text-xl mr-3">📦</span>
+                Produk
+            </a>
+            <a href="{{ url_for('admin_orders') }}" 
+               class="flex items-center px-4 py-3 rounded-lg hover:bg-white/10 transition">
+                <span class="text-xl mr-3">🛒</span>
+                Pesanan
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/20">
+            <a href="{{ url_for('logout') }}" 
+               class="flex items-center px-4 py-3 rounded-lg bg-red-500 hover:bg-red-600 font-semibold transition">
+                <span class="text-xl mr-3">🚪</span>
+                Keluar
+            </a>
+        </div>
+    </div>
+    
+    <!-- Mobile Menu Button -->
+    <div class="md:hidden fixed top-4 left-4 z-50">
+        <button onclick="toggleMobileMenu()" class="gradient-bg text-white p-3 rounded-lg shadow-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
+                <p class="text-gray-600">Ringkasan operasi koperasi sekolah</p>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Orders -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium mb-1">Jumlah Pesanan</p>
+                            <p class="text-3xl font-bold text-gray-800">{{ stats.total_orders }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Semua masa</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full p-4">
+                            <span class="text-4xl">📦</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Total Sales -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium mb-1">Jumlah Jualan</p>
+                            <p class="text-3xl font-bold text-purple-600">RM {{ "%.2f"|format(stats.total_sales) }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Terkumpul</p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full p-4">
+                            <span class="text-4xl">💰</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pending Orders -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium mb-1">Pesanan Menunggu</p>
+                            <p class="text-3xl font-bold text-yellow-600">{{ stats.pending_orders }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Perlu tindakan</p>
+                        </div>
+                        <div class="bg-yellow-100 rounded-full p-4">
+                            <span class="text-4xl">⏳</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Total Products -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium mb-1">Jumlah Produk</p>
+                            <p class="text-3xl font-bold text-green-600">{{ stats.total_products }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Dalam katalog</p>
+                        </div>
+                        <div class="bg-green-100 rounded-full p-4">
+                            <span class="text-4xl">📝</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Orders Table -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-800">Pesanan Terkini</h2>
+                        <a href="{{ url_for('admin_orders') }}" 
+                           class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                            Lihat Semua →
+                        </a>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Pelajar</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Jumlah</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tarikh</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% if recent_orders %}
+                                {% for order in recent_orders %}
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="font-mono font-semibold text-gray-800">#{{ order.id }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                                <span class="text-purple-600 font-semibold text-sm">{{ order.student_name[0] }}</span>
+                                            </div>
+                                            <span class="font-medium text-gray-800">{{ order.student_name }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="font-bold text-purple-600">RM {{ "%.2f"|format(order.total_amount) }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                            {% if order.status == 'completed' %}bg-green-100 text-green-800
+                                            {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                                            {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                            {{ order.status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        {{ order.created_at }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                        <div class="text-4xl mb-2">📭</div>
+                                        Tiada pesanan lagi
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleMobileMenu() {
+    // Mobile menu functionality can be added here
+    alert('Mobile menu - sila gunakan versi desktop untuk navigasi penuh');
+}
+</script>
+{% endblock %}

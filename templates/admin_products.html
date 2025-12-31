@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Pengurusan Produk - Koperasi Sekolah{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-50">
+    <!-- Sidebar -->
+    <div class="hidden md:flex md:flex-col md:w-64 gradient-bg text-white flex-shrink-0">
+        <div class="flex items-center h-16 px-4 border-b border-white/20">
+            <span class="text-2xl mr-3">🏫</span>
+            <span class="font-bold text-xl">Admin Panel</span>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="{{ url_for('admin_dashboard') }}" 
+               class="flex items-center px-4 py-3 rounded-lg hover:bg-white/10 transition">
+                <span class="text-xl mr-3">📊</span>
+                Dashboard
+            </a>
+            <a href="{{ url_for('admin_products') }}" 
+               class="flex items-center px-4 py-3 rounded-lg bg-white/20 font-semibold hover:bg-white/30 transition">
+                <span class="text-xl mr-3">📦</span>
+                Produk
+            </a>
+            <a href="{{ url_for('admin_orders') }}" 
+               class="flex items-center px-4 py-3 rounded-lg hover:bg-white/10 transition">
+                <span class="text-xl mr-3">🛒</span>
+                Pesanan
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/20">
+            <a href="{{ url_for('logout') }}" 
+               class="flex items-center px-4 py-3 rounded-lg bg-red-500 hover:bg-red-600 font-semibold transition">
+                <span class="text-xl mr-3">🚪</span>
+                Keluar
+            </a>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Pengurusan Produk</h1>
+                    <p class="text-gray-600">Urus katalog produk koperasi</p>
+                </div>
+                <button onclick="showAddProductModal()" 
+                        class="gradient-bg text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition transform hover:scale-105 shadow-lg">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Tambah Produk
+                    </span>
+                </button>
+            </div>
+            
+            <!-- Products Table -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Produk</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kategori</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Harga</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stok</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for product in products %}
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <span class="text-3xl mr-3">{{ product.image }}</span>
+                                        <div>
+                                            <p class="font-semibold text-gray-800">{{ product.name }}</p>
+                                            <p class="text-sm text-gray-500">{{ product.description }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        {{ product.category }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="font-bold text-purple-600">RM {{ "%.2f"|format(product.price) }}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="font-semibold {% if product.stock > 10 %}text-green-600{% elif product.stock > 0 %}text-orange-600{% else %}text-red-600{% endif %}">
+                                        {{ product.stock }} unit
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button onclick="showEditModal({{ product.id }}, '{{ product.name }}', {{ product.price }}, {{ product.stock }})" 
+                                            class="text-blue-600 hover:text-blue-800 font-medium mr-3">
+                                        ✏️ Edit
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div id="addProductModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-white border-b p-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Tambah Produk Baharu</h2>
+                <button onclick="closeAddProductModal()" class="text-gray-500 hover:text-gray-700 text-3xl leading-none">
+                    &times;
+                </button>
+            </div>
+        </div>
+        
+        <form method="POST" action="{{ url_for('add_product') }}" class="p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Produk <span class="text-red-500">*</span></label>
+                <input type="text" name="name" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                       placeholder="Cth: Buku Tulis 80 Muka">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                <textarea name="description" rows="3" 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          placeholder="Penerangan ringkas tentang produk"></textarea>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Harga (RM) <span class="text-red-500">*</span></label>
+                    <input type="number" name="price" step="0.01" min="0" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                           placeholder="0.00">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Stok <span class="text-red-500">*</span></label>
+                    <input type="number" name="stock" min="0" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                           placeholder="0">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Kategori <span class="text-red-500">*</span></label>
+                <select name="category" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <option value="">Pilih Kategori</option>
+                    <option value="Alat Tulis">Alat Tulis</option>
+                    <option value="Buku">Buku</option>
+                    <option value="Aksesori">Aksesori</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Emoji Icon <span class="text-red-500">*</span></label>
+                <input type="text" name="image" required maxlength="4"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                       placeholder="Cth: 📓">
+                <p class="text-xs text-gray-500 mt-1">Masukkan emoji untuk icon produk</p>
+            </div>
+            
+            <div class="flex gap-3 pt-4">
+                <button type="button" onclick="closeAddProductModal()" 
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-lg font-semibold transition">
+                    Batal
+                </button>
+                <button type="submit" 
+                        class="flex-1 gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                    Tambah Produk
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div id="editProductModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full">
+        <div class="bg-white border-b p-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Edit Produk</h2>
+                <button onclick="closeEditModal()" class="text-gray-500 hover:text-gray-700 text-3xl leading-none">
+                    &times;
+                </button>
+            </div>
+        </div>
+        
+        <form id="editForm" method="POST" class="p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Produk</label>
+                <input type="text" id="editName" readonly 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Harga (RM) <span class="text-red-500">*</span></label>
+                <input type="number" name="price" id="editPrice" step="0.01" min="0" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Stok <span class="text-red-500">*</span></label>
+                <input type="number" name="stock" id="editStock" min="0" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+            </div>
+            
+            <div class="flex gap-3 pt-4">
+                <button type="button" onclick="closeEditModal()" 
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-lg font-semibold transition">
+                    Batal
+                </button>
+                <button type="submit" 
+                        class="flex-1 gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                    Simpan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showAddProductModal() {
+    document.getElementById('addProductModal').classList.remove('hidden');
+}
+
+function closeAddProductModal() {
+    document.getElementById('addProductModal').classList.add('hidden');
+}
+
+function showEditModal(id, name, price, stock) {
+    document.getElementById('editName').value = name;
+    document.getElementById('editPrice').value = price;
+    document.getElementById('editStock').value = stock;
+    document.getElementById('editForm').action = `/admin/update_product/${id}`;
+    document.getElementById('editProductModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('editProductModal').classList.add('hidden');
+}
+
+// Close modals on outside click
+document.getElementById('addProductModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAddProductModal();
+});
+
+document.getElementById('editProductModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+});
+</script>
+{% endblock %}

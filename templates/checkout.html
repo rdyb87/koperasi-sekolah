@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Pembayaran - Koperasi Sekolah{% endblock %}
+
+{% block content %}
+<!-- Navigation Bar -->
+<nav class="gradient-bg text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <a href="{{ url_for('student_dashboard') }}" class="flex items-center hover:opacity-80 transition">
+                <span class="text-2xl mr-3">←</span>
+                <span class="font-bold text-xl">Kembali ke Kedai</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Pembayaran</h1>
+    
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        <!-- Order Summary -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-2xl mr-2">📦</span>
+                Ringkasan Pesanan
+            </h2>
+            <div id="orderSummary" class="space-y-3"></div>
+            <div class="border-t mt-6 pt-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-xl font-bold text-gray-800">Jumlah Keseluruhan:</span>
+                    <span id="totalAmount" class="text-3xl font-bold text-purple-600"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment Information -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-2xl mr-2">💳</span>
+                Maklumat Pembayaran
+            </h2>
+            
+            <!-- Payment Instructions -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-blue-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-blue-800 mb-2">Arahan Pembayaran:</p>
+                        <ol class="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+                            <li>Buat pembayaran ke akaun bank koperasi sekolah</li>
+                            <li>Ambil gambar atau screenshot bukti pembayaran</li>
+                            <li>Muat naik bukti pembayaran di bawah</li>
+                            <li>Klik 'Hantar Pesanan' untuk selesai</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bank Details Card -->
+            <div class="bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl p-6 text-white mb-6">
+                <h3 class="font-bold text-lg mb-4">Maklumat Bank Koperasi</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-purple-200">Nama Bank:</span>
+                        <span class="font-semibold">Maybank</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-purple-200">No. Akaun:</span>
+                        <span class="font-semibold font-mono">1234 5678 9012</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-purple-200">Nama Penerima:</span>
+                        <span class="font-semibold">Koperasi Sekolah Asrama</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Upload Payment Proof -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Bukti Pembayaran <span class="text-red-500">*</span>
+                </label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-purple-500 transition">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-gray-600">
+                            <label for="payment_proof" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500">
+                                <span>Muat naik fail</span>
+                                <input id="payment_proof" name="payment_proof" type="file" accept="image/*" required class="sr-only" onchange="displayFileName(this)">
+                            </label>
+                            <p class="pl-1">atau seret dan lepas</p>
+                        </div>
+                        <p class="text-xs text-gray-500">PNG, JPG, JPEG sehingga 5MB</p>
+                        <p id="fileName" class="text-sm font-medium text-purple-600 mt-2"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notes -->
+            <div>
+                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
+                    Catatan Tambahan (Pilihan)
+                </label>
+                <textarea 
+                    id="notes"
+                    name="notes" 
+                    rows="3" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                    placeholder="Contoh: Untuk asrama blok A, bilik 101"></textarea>
+            </div>
+        </div>
+        
+        <!-- Hidden field for cart data -->
+        <input type="hidden" name="cart_data" id="cartData">
+        
+        <!-- Submit Button -->
+        <button 
+            type="submit" 
+            class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:opacity-90 transition transform hover:scale-105 shadow-lg">
+            <span class="flex items-center justify-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Hantar Pesanan
+            </span>
+        </button>
+    </form>
+</div>
+
+<script>
+const cart = JSON.parse(localStorage.getItem('checkoutCart')) || [];
+
+function renderOrderSummary() {
+    const container = document.getElementById('orderSummary');
+    
+    if (cart.length === 0) {
+        window.location.href = '{{ url_for("student_dashboard") }}';
+        return;
+    }
+    
+    let html = '';
+    let total = 0;
+    
+    cart.forEach(item => {
+        const subtotal = item.price * item.quantity;
+        total += subtotal;
+        html += `
+            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                <div class="flex-1">
+                    <p class="font-semibold text-gray-800">${item.name}</p>
+                    <p class="text-sm text-gray-600">${item.quantity} unit × RM ${item.price.toFixed(2)}</p>
+                </div>
+                <p class="font-bold text-purple-600">RM ${subtotal.toFixed(2)}</p>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    document.getElementById('totalAmount').textContent = `RM ${total.toFixed(2)}`;
+    document.getElementById('cartData').value = JSON.stringify(cart);
+}
+
+function displayFileName(input) {
+    const fileName = input.files[0]?.name;
+    const fileNameElement = document.getElementById('fileName');
+    if (fileName) {
+        fileNameElement.textContent = `📎 ${fileName}`;
+    }
+}
+
+// Form submission
+document.querySelector('form').addEventListener('submit', function(e) {
+    const paymentProof = document.getElementById('payment_proof');
+    
+    if (!paymentProof.files[0]) {
+        e.preventDefault();
+        alert('Sila muat naik bukti pembayaran');
+        return false;
+    }
+    
+    // Show loading state
+    const submitBtn = document.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+        <span class="flex items-center justify-center">
+            <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Menghantar...
+        </span>
+    `;
+    
+    // Clear cart after submission
+    localStorage.removeItem('checkoutCart');
+    localStorage.removeItem('cart');
+});
+
+// Initialize
+renderOrderSummary();
+
+// Drag and drop functionality
+const dropZone = document.querySelector('.border-dashed');
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => {
+        dropZone.classList.add('border-purple-500', 'bg-purple-50');
+    }, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => {
+        dropZone.classList.remove('border-purple-500', 'bg-purple-50');
+    }, false);
+});
+
+dropZone.addEventListener('drop', (e) => {
+    const files = e.dataTransfer.files;
+    if (files.length) {
+        document.getElementById('payment_proof').files = files;
+        displayFileName(document.getElementById('payment_proof'));
+    }
+}, false);
+</script>
+{% endblock %}

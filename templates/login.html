@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Log Masuk - Koperasi Sekolah{% endblock %}
+
+{% block content %}
+<div class="min-h-screen gradient-bg flex items-center justify-center px-4 py-8">
+    <div class="max-w-md w-full">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 fade-in">
+            <!-- Logo & Title -->
+            <div class="text-center mb-8">
+                <div class="text-6xl mb-4">🏫</div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Koperasi Sekolah</h1>
+                <p class="text-gray-600">Sistem Pembelian Peralatan Sekolah Asrama</p>
+            </div>
+            
+            <!-- Error Message -->
+            {% if error %}
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="font-medium">{{ error }}</span>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Login Form -->
+            <form method="POST" action="{{ url_for('login') }}" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                        Username
+                    </label>
+                    <input 
+                        type="text" 
+                        id="username"
+                        name="username" 
+                        required 
+                        autofocus
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        placeholder="Masukkan username anda">
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                        Password
+                    </label>
+                    <input 
+                        type="password" 
+                        id="password"
+                        name="password" 
+                        required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        placeholder="Masukkan password anda">
+                </div>
+                
+                <button 
+                    type="submit" 
+                    class="w-full gradient-bg text-white py-3 rounded-lg font-semibold text-lg hover:opacity-90 transition transform hover:scale-105">
+                    Log Masuk
+                </button>
+            </form>
+            
+            <!-- Demo Credentials & Register Link -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <div class="text-center space-y-3">
+                    <p class="text-sm text-gray-600 font-medium">Akaun Demo:</p>
+                    <div class="bg-gray-50 rounded-lg p-3 space-y-1">
+                        <p class="text-sm">
+                            <span class="font-semibold text-gray-700">Admin:</span> 
+                            <span class="font-mono text-purple-600">admin / admin123</span>
+                        </p>
+                    </div>
+                    
+                    <div class="pt-2">
+                        <p class="text-sm text-gray-600">Belum ada akaun pelajar?</p>
+                        <a href="{{ url_for('register') }}" 
+                           class="inline-block mt-2 text-purple-600 hover:text-purple-800 font-semibold transition">
+                            Daftar Sekarang →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-6 text-white text-sm">
+            <p>© 2024 Koperasi Sekolah. Sistem Pembelian Peralatan.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Pesanan Saya - Koperasi Sekolah{% endblock %}
+
+{% block content %}
+<!-- Navigation Bar -->
+<nav class="gradient-bg text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <a href="{{ url_for('student_dashboard') }}" class="flex items-center hover:opacity-80 transition">
+                <span class="text-2xl mr-3">🏫</span>
+                <span class="font-bold text-xl">Koperasi Sekolah</span>
+            </a>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('student_dashboard') }}" 
+                   class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition">
+                    🛍️ Kedai
+                </a>
+                <a href="{{ url_for('logout') }}" 
+                   class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition">
+                    Keluar
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Pesanan Saya</h1>
+        <p class="text-gray-600">Lihat status dan sejarah pesanan anda</p>
+    </div>
+    
+    {% if orders %}
+    <div class="space-y-6">
+                    {% for order_data in orders %}
+        {% set order = order_data['order'] %}
+        {% set order_items = order_data['items'] %}
+        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition">
+            <!-- Order Header -->
+            <div class="bg-gradient-to-r from-purple-50 to-purple-100 p-6 border-b">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Pesanan #{{ order.id }}</h3>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                {% if order.status == 'completed' %}bg-green-100 text-green-800
+                                {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                                {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {% if order.status == 'pending' %}⏳ Menunggu Pengesahan
+                                {% elif order.status == 'processing' %}🔄 Sedang Diproses
+                                {% elif order.status == 'completed' %}✅ Selesai
+                                {% elif order.status == 'cancelled' %}❌ Dibatalkan
+                                {% endif %}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600">
+                            📅 {{ order.created_at }}
+                        </p>
+                        {% if order.notes %}
+                        <p class="text-sm text-gray-600 mt-1">
+                            📝 Catatan: {{ order.notes }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="text-left sm:text-right">
+                        <p class="text-sm text-gray-600 mb-1">Jumlah Bayaran</p>
+                        <p class="text-2xl font-bold text-purple-600">RM {{ "%.2f"|format(order.total_amount) }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Items -->
+            <div class="p-6">
+                <h4 class="font-semibold text-gray-800 mb-4 flex items-center">
+                    <span class="text-lg mr-2">📦</span>
+                    Item Pesanan
+                </h4>
+                <div class="space-y-3">
+                    {% for item in order_items %}
+                    <div class="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">{{ item.product_name }}</p>
+                            <p class="text-sm text-gray-600">{{ item.quantity }} unit × RM {{ "%.2f"|format(item.price) }}</p>
+                        </div>
+                        <p class="font-bold text-purple-600">RM {{ "%.2f"|format(item.price * item.quantity) }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Payment Proof -->
+                {% if order.payment_proof %}
+                <div class="mt-6 pt-6 border-t">
+                    <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                        <span class="text-lg mr-2">💳</span>
+                        Bukti Pembayaran
+                    </h4>
+                    <a href="{{ url_for('static', filename='uploads/' + order.payment_proof) }}" 
+                       target="_blank"
+                       class="inline-block bg-purple-50 hover:bg-purple-100 text-purple-600 px-4 py-2 rounded-lg transition">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            Lihat Bukti Pembayaran
+                        </span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white rounded-xl shadow-md p-12 text-center">
+        <div class="max-w-sm mx-auto">
+            <div class="text-6xl mb-4">📭</div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Tiada Pesanan Lagi</h3>
+            <p class="text-gray-600 mb-6">Anda belum membuat sebarang pesanan. Mulakan pembelian peralatan sekolah sekarang!</p>
+            <a href="{{ url_for('student_dashboard') }}" 
+               class="inline-block gradient-bg text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition transform hover:scale-105">
+                Mula Membeli-belah
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Status Legend -->
+{% if orders %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="bg-gray-50 rounded-lg p-6">
+        <h3 class="font-semibold text-gray-800 mb-4">Maklumat Status Pesanan:</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            <div class="flex items-start">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 mr-2">⏳</span>
+                <div>
+                    <p class="font-medium text-gray-800">Menunggu Pengesahan</p>
+                    <p class="text-gray-600 text-xs">Pesanan sedang disemak oleh admin</p>
+                </div>
+            </div>
+            <div class="flex items-start">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 mr-2">🔄</span>
+                <div>
+                    <p class="font-medium text-gray-800">Sedang Diproses</p>
+                    <p class="text-gray-600 text-xs">Pesanan sedang disediakan</p>
+                </div>
+            </div>
+            <div class="flex items-start">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 mr-2">✅</span>
+                <div>
+                    <p class="font-medium text-gray-800">Selesai</p>
+                    <p class="text-gray-600 text-xs">Pesanan siap untuk diambil</p>
+                </div>
+            </div>
+            <div class="flex items-start">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 mr-2">❌</span>
+                <div>
+                    <p class="font-medium text-gray-800">Dibatalkan</p>
+                    <p class="text-gray-600 text-xs">Pesanan telah dibatalkan</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
